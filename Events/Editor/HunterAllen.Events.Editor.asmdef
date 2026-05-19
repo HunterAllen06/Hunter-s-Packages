@@ -1,0 +1,20 @@
+{
+    "name": "HunterAllen.Events.Editor",
+    "rootNamespace": "HunterAllen.Events.Editor",
+    "references": [
+        "GUID:860af19d8f4cbce4dbf1fb91d09fda87"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_EDITOR"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

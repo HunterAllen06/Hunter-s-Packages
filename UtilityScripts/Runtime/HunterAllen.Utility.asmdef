@@ -1,0 +1,22 @@
+{
+    "name": "HunterAllen.UtilityScripts",
+    "rootNamespace": "HunterAllen.Utility",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Sirenix.OdinInspector.Attributes.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "con.sirenix.odininspector",
+            "expression": "0.0.0",
+            "define": "ODIN_INSPECTOR"
+        }
+    ],
+    "noEngineReferences": false
+}
