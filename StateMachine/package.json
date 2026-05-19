@@ -1,0 +1,10 @@
+{
+  "name": "com.hunterallen.statemachine",
+  "version": "1.0.2",
+  "displayName": "State Machine",
+  "description": "A simple system to control and manage the flow and transitions of two or more states.",
+  "author": 
+  {
+    "name": "Hunter Allen"
+  }
+}

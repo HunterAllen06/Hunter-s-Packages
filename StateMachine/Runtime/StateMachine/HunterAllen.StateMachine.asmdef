@@ -1,0 +1,22 @@
+{
+    "name": "HunterAllen.StateMachine",
+    "rootNamespace": "HunterAllen.StateMachine",
+    "references": [
+        "GUID:30817c1a0e6d646d99c048fc403f5979"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.mirror-networking.mirror",
+            "expression": "0.0.0",
+            "define": "MIRROR"
+        }
+    ],
+    "noEngineReferences": false
+}
