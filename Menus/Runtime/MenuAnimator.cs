@@ -60,6 +60,10 @@ namespace HunterAllen.Menus
             _menu.OnEnterMenu.AddListener(OnEnterMenu);
             _menu.OnExitMenu.AddListener(OnExitMenu);
 
+            _menu.CanvasGroup.alpha = _menu.IsMenuActive ? _onAlpha : _offAlpha;
+            _transform.localPosition = _initialPosition + (_menu.IsMenuActive ? _positionOffset : Vector2.zero);
+            _transform.localScale = _initialSize + (_menu.IsMenuActive ? _sizeOffset : Vector2.zero);
+
             _initAlpha = _menu.CanvasGroup.alpha;
             _initPos = _transform.localPosition;
             _initSize = _transform.localScale;

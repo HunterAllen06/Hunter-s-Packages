@@ -47,7 +47,11 @@ public class EventBusCreatorWindow : EditorWindow
     void OnEnable()
     {
         _assetPath = EditorPrefs.HasKey("EVENT_BUSES_PATH") ? EditorPrefs.GetString("EVENT_BUSES_PATH") : "Assets/_Project/ScriptableObjects/EventBuses";
+        #if UNITY_6000_5_OR_NEWER
+        _currentPath = AssetDatabase.GetAssetPath(Selection.entityIds[0]);
+        #else
         _currentPath = AssetDatabase.GetAssetPath(Selection.activeInstanceID);
+        #endif
         _selectedFolderIndex = EditorPrefs.HasKey("EVENT_BUSES_PATHINDEX") ? EditorPrefs.GetInt("EVENT_BUSES_PATHINDEX") : 0;
 
         var asset = _currentPath.Split("/").FirstOrDefault(x => x.Contains(".asset"));

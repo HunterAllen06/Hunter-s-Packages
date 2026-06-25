@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace HunterAllen.SaveSystem
 {
-    public abstract class SaveManager
+    public static class SaveManager
     {
         public static Dictionary<Type, object> Data = new();
 
@@ -15,7 +15,7 @@ namespace HunterAllen.SaveSystem
         /// <summary>
         /// Called as soon as the game starts via GameBootstrapper.cs
         /// </summary>
-        protected virtual void Initialize()
+        public static void Initialize()
         {
             if (_hasInitialized)
             {
@@ -28,24 +28,24 @@ namespace HunterAllen.SaveSystem
             _hasInitialized = true;
         }
 
-        public void New<T>(T t)
+        public static void New<T>(T t, string fileName)
         {
             Data[typeof(T)] = t;
-            Save(t);
+            Save(t, fileName);
             Debug.Log($"Created new {typeof(T).Name}.");
         }
 
-        public void Save<T>() => Save(Get<T>());
-        public void Save<T>(T data)
+        public static void Save<T>(string fileName) => Save(Get<T>(), fileName);
+        public static void Save<T>(T data, string fileName)
         {
             // Save data
-            _dataHandler.Save(data, GetDataFileName<T>());
+            _dataHandler.Save(data, fileName);
         }
 
-        public T Load<T>()
+        public static T Load<T>(string fileName)
         {
             // Load data
-            T data = _dataHandler.Load<T>(GetDataFileName<T>());
+            T data = _dataHandler.Load<T>(fileName);
 
             if (data == null)
             {
@@ -68,7 +68,5 @@ namespace HunterAllen.SaveSystem
             }
             return (T)Data[typeof(T)];
         }
-
-        public abstract string GetDataFileName<T>();
     }
 }

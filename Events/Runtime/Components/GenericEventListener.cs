@@ -5,7 +5,7 @@ namespace HunterAllen.Events
 {
     public abstract class GenericEventListener<T> : MonoBehaviour
     {
-        [SerializeField] protected abstract GenericEventBus<T> _genericEventBus { get; set; }
+        protected abstract GenericEventBus<T> _genericEventBus { get; set; }
         [SerializeField] UnityEvent<T> _onRaiseEvent;
 
         protected virtual void OnEnable()

@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace HunterAllen.Menus
 {
+    [DefaultExecutionOrder(-1)]
     public class MenuGroup : MonoBehaviour
     {
         public Menu ActiveMenu;
