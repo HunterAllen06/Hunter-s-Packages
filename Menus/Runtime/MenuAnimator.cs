@@ -7,32 +7,24 @@ namespace HunterAllen.Menus
     public class MenuAnimator : MonoBehaviour
     {
         [Header("Animation")]
-        [SerializeField]
-        float _animationLength = 0.5f;
+        public float _animationLength = 0.5f;
 
-        [SerializeField]
-        AnimationCurve _animationCurve;
+        public AnimationCurve _animationCurve;
 
         [Header("Canvas")]
-        [SerializeField]
-        float _offAlpha;
+        public float _offAlpha = 0f;
 
-        [SerializeField]
-        float _onAlpha;
+        public float _onAlpha = 1f;
 
         [Header("Transform")]
-        [SerializeField]
-        Vector2 _initialPosition;
+        public Vector2 _initialPosition = Vector2.zero;
 
-        [SerializeField]
-        Vector2 _positionOffset;
+        public Vector2 _positionOffset = Vector2.zero;
 
         [Space]
-        [SerializeField]
-        Vector2 _initialSize;
+        public Vector2 _initialSize = Vector2.one;
 
-        [SerializeField]
-        Vector2 _sizeOffset;
+        public Vector2 _sizeOffset = Vector2.zero;
 
         Menu _menu;
         RectTransform _transform;

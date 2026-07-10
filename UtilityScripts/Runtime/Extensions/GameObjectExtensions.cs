@@ -69,6 +69,16 @@ namespace HunterAllen.Utility
             component = self.GetComponentInChildren<T>();
             return component != null;
         }
+        public static bool TryGetComponentInRelatives<T>(this Component self, out T component) where T : Component
+        {
+            component = self.GetComponentInChildren<T>()??self.GetComponentInParent<T>();
+            return component != null;
+        }
+        public static bool TryGetComponentInRelatives<T>(this GameObject self, out T component) where T : Component
+        {
+            component = self.GetComponentInChildren<T>()??self.GetComponentInParent<T>();
+            return component != null;
+        }
         
         /// <summary>
         /// Compares the layer on a GameObject to a LayerMask
