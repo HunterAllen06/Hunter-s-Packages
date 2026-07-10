@@ -7,24 +7,24 @@ namespace HunterAllen.Player
     {
         [Header("Components")]
         [SerializeField]
-        PlayerMover _playerMover;
+        protected PlayerMover _playerMover;
 
         [SerializeField]
-        PlayerCamera _playerCamera;
+        protected PlayerCamera _playerCamera;
 
-        public void ProvideMoveInput(Vector2 input)
+        public virtual void ProvideMoveInput(Vector2 input)
         {
             _playerMover.SetMoveInput(input);
         }
-        public void ProvideLookInput(Vector2 input)
+        public virtual void ProvideLookInput(Vector2 input)
         {
             _playerCamera.ApplyLookInput(input);
         }
-        public void ProvideSprintInput(bool input)
+        public virtual void ProvideSprintInput(bool input)
         {
             _playerMover.SetSprint(input);
         }
-        public void ProvideCrouchInput(bool input)
+        public virtual void ProvideCrouchInput(bool input)
         {
             _playerMover.SetCrouch(input);
         }
