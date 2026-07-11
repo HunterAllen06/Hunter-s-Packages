@@ -73,7 +73,7 @@ MonoBehaviour:
   _springForceSprintMultiplier: 1.8
   _springDamp: 2500
   _springHeight: 0.55
-  _springRaycastDistance: 0.9
+  _springRaycastDistance: 1
   _springRadius: 0.9
   _directionBias: 0.2
   _directionBiasSprintMultiplier: 1.5
@@ -99,7 +99,11 @@ MonoBehaviour:
   _cameraTransform: {fileID: 4686990253405015167}
   _playerBodyTransform: {fileID: 8308521631056571662}
   _sensitivity: 0.5
-  _smoothSpeed: 25
+  _smoothTime: 0.02
+  RotX: 0
+  RotY: 0
+  RotXLerped: 0
+  RotYLerped: 0
 --- !u!1 &4813766582857676165
 GameObject:
   m_ObjectHideFlags: 0

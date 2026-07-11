@@ -16,20 +16,43 @@ namespace HunterAllen.Player
         float _sensitivity = 1f;
 
         [SerializeField]
-        float _smoothSpeed = 8f;
+        float _smoothTime = 0.05f;
 
         Vector3 _targetLookEulerAngles;
 
+        [HideInInspector] public bool InvertMouseY { get; set; }
+        Vector2 _lookInput;
+
+        [HideInInspector] public float RotX;
+        [HideInInspector] public float RotY;
+        [HideInInspector] public float RotXLerped;
+        [HideInInspector] public float RotYLerped;
+
+        float _mouseX;
+        float _mouseY;
+        float _rotXVelocity;
+        float _rotYVelocity;
+
         void Update()
         {
-            _cameraTransform.localRotation = Quaternion.Slerp(_cameraTransform.localRotation, Quaternion.Euler(_targetLookEulerAngles.x * Vector3.right), 1f - Mathf.Exp(-Time.deltaTime * _smoothSpeed));
-            _playerBodyTransform.localRotation = Quaternion.Slerp(_playerBodyTransform.localRotation, Quaternion.Euler(_targetLookEulerAngles.y * Vector3.up), 1f - Mathf.Exp(-Time.deltaTime * _smoothSpeed));
+            RotXLerped = Mathf.SmoothDamp(RotXLerped, RotX, ref _rotXVelocity, _smoothTime);
+            RotYLerped = Mathf.SmoothDamp(RotYLerped, RotY, ref _rotYVelocity, _smoothTime);
+            
+            _cameraTransform.localRotation = Quaternion.Euler(RotXLerped * Vector3.right);
+            _playerBodyTransform.localRotation = Quaternion.Euler(RotYLerped * Vector3.up);
         }
         
         public void ApplyLookInput(Vector2 input)
         {
             _targetLookEulerAngles += _sensitivity * (input.x * Vector3.up - input.y * Vector3.right);
             _targetLookEulerAngles.x = Mathf.Clamp(_targetLookEulerAngles.x, -89f, 89f);
+
+            _mouseX = input.x;
+            _mouseY = input.y * (InvertMouseY ? -1 : 1);
+
+            RotX -= _mouseY * _sensitivity;
+            RotY += _mouseX * _sensitivity;
+            RotX = Mathf.Clamp(RotX, -89f, 89f);
         }
     }
 }
