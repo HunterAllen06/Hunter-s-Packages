@@ -1,22 +1,25 @@
+using System;
 using System.IO;
+using System.Text;
 using UnityEngine;
 
 namespace HunterAllen.SaveSystem
 {
-    public class FileDataHandler : IDataHandler
+    public class FileDataHandler : IDataSaveHandler
     {
         string _dataPath = "";
         
-        public void Save<T>(T t, string nameAndExtension)
+        public void Save<T>(T t, string fileName)
         {
-            string fullPath = Path.Combine(_dataPath, nameAndExtension);
+            string fullPath = Path.Combine(_dataPath, fileName + ".dat");
             Debug.Log($"Attempting to save {typeof(T).Name} to {fullPath}...");
 
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
 
-                string data = JsonUtility.ToJson(t, true);
+                string dataAsJson = JsonUtility.ToJson(t, true);
+                string data = Convert.ToBase64String(Encoding.UTF8.GetBytes(dataAsJson));
 
                 using (FileStream stream = new(fullPath, FileMode.Create))
                 {
@@ -32,9 +35,9 @@ namespace HunterAllen.SaveSystem
             }
         }
 
-        public T Load<T>(string nameAndExtension)
+        public T Load<T>(string fileName)
         {
-            string fullPath = Path.Combine(_dataPath, nameAndExtension);
+            string fullPath = Path.Combine(_dataPath, fileName + ".dat");
 
             T data = default;
 
@@ -42,17 +45,18 @@ namespace HunterAllen.SaveSystem
             {
                 try
                 {
-                    string dataAsJson = "";
+                    string encryptedData = "";
 
                     Debug.Log($"Found {typeof(T).Name} at {fullPath}, loading...");
                     using (FileStream stream = new(fullPath, FileMode.Open))
                     {
                         using (StreamReader reader = new(stream))
                         {
-                            dataAsJson = reader.ReadToEnd();
+                            encryptedData = reader.ReadToEnd();
                         }
                     }
 
+                    string dataAsJson = Encoding.UTF8.GetString(Convert.FromBase64String(encryptedData));
                     Debug.Log($"Converting {typeof(T).Name} from Json...");
                     data = JsonUtility.FromJson<T>(dataAsJson);
                 }
@@ -65,9 +69,9 @@ namespace HunterAllen.SaveSystem
             return data;
         }
 
-        public FileDataHandler(string path)
+        public FileDataHandler(string filePath)
         {
-            _dataPath = path;
+            _dataPath = filePath;
         }
     }
 }

@@ -2,71 +2,183 @@ using UnityEngine;
 using Sirenix.OdinInspector;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HunterAllen.SaveSystem
 {
     public static class SaveManager
     {
-        public static Dictionary<Type, object> Data = new();
+        //                     Data Name   Data
+        public static Dictionary<string, object> Data = new();
 
-        static IDataHandler _dataHandler;
-        static bool _hasInitialized;
+        static IDataSaveHandler _dataHandler;
 
         /// <summary>
         /// Called as soon as the game starts via GameBootstrapper.cs
         /// </summary>
         public static void Initialize()
         {
-            if (_hasInitialized)
-            {
-                Debug.Log("SaveManager tried initializing more than once, skipping initialization.");
-                return;
-            }
-
+            Data = new();
             _dataHandler = new FileDataHandler(Application.persistentDataPath);
-
-            _hasInitialized = true;
         }
-
-        public static void New<T>(T t, string fileName)
+        
+        /// <summary>
+        /// Creates save data at the given file path and assigns the given data name.
+        /// </summary>
+        public static void New<T>(T t, string dataName, string fileName, int profile = 0)
         {
-            Data[typeof(T)] = t;
-            Save(t, fileName);
+            Data[dataName] = t;
+            Save(t, fileName, profile);
             Debug.Log($"Created new {typeof(T).Name}.");
         }
 
-        public static void Save<T>(string fileName) => Save(Get<T>(), fileName);
-        public static void Save<T>(T data, string fileName)
+        /// <summary>
+        /// Saves data with the corresponding data name to the given file path.
+        /// </summary>
+        public static void Save(string dataName, string fileName, int profile = 0)
+        {
+            Save(Get<SaveData>(dataName), fileName, profile);
+        }
+        /// <summary>
+        /// Saves data to the given file path.
+        /// </summary>
+        public static void Save<T>(T data, string fileName, int profile = 0)
         {
             // Save data
-            _dataHandler.Save(data, fileName);
+            _dataHandler.Save(data, fileName + profile);
         }
 
-        public static T Load<T>(string fileName)
+        /// <summary>
+        /// Finds all IDataProviders<T> and saves the data to the given file path.
+        /// </summary>
+        public static void SaveAllData<T>(string dataName, string fileName, int profile = 0)
         {
-            // Load data
-            T data = _dataHandler.Load<T>(fileName);
+            var objects = GameObject.FindObjectsByType<MonoBehaviour>().OfType<IDataProvider<T>>();
+            var data = (SaveData)Data[dataName];
+
+            foreach (var obj in objects)
+            {
+                if (!Data.ContainsKey(dataName))
+                {
+                    Data.Add(dataName, new SaveData());
+                }
+                if (!data.ContainsKey(typeof(T).Name))
+                {
+                    data.Add(typeof(T).Name, new SaveData<T>());
+                }
+                data[typeof(T).Name].Set(obj.Id, obj.ProvideData());
+            }
+
+            _dataHandler.Save(Data[dataName], fileName + profile);
+        }
+
+        /// <summary>
+        /// Attempts to load SaveData with the corresponding data name from the given file path.
+        /// </summary>
+        public static SaveData Load(string dataName, string fileName, int profile = 0)
+        {
+            var data = _dataHandler.Load<SaveData>(fileName + profile);
 
             if (data == null)
             {
-                Debug.LogWarning($"No {typeof(T).Name} found, initial data needs to be created.");
+                Debug.LogWarning($"No file with name {Application.persistentDataPath + fileName + profile}.dat found, initial data needs to be created.");
                 return default;
             }
 
-            // Push data
-            Data[typeof(T)] = data;
+            Data[dataName] = data;
+            return data;
+        }
+        /// <summary>
+        /// Attempts to load data with the corresponding data name form the given file path.
+        /// </summary>
+        public static T Load<T>(string dataName, string fileName, int profile = 0)
+        {
+            // Load data
+            T data = _dataHandler.Load<T>(fileName + profile);
+
+            if (data == null)
+            {
+                Debug.LogWarning($"No data of type {typeof(T).Name} found at {Application.persistentDataPath + fileName + profile}.dat, initial data needs to be created.");
+                return default;
+            }
+
+            Data[dataName] = data;
+            return data;
+        }
+
+        /// <summary>
+        /// Provides all IDataHandler<T>'s with SaveData of type T with the corresponding data name from the given file path.
+        /// </summary>
+        public static void LoadAllData<T>(string dataName, string fileName, int profile = 0)
+        {
+            T saveData = _dataHandler.Load<T>(fileName + profile);
+
+            if (saveData == null)
+            {
+                Debug.LogWarning($"No data of type {typeof(T).Name} found at {Application.persistentDataPath + fileName + profile}.dat, initial data needs to be created.");
+                return;
+            }
+
+            Data[dataName] = saveData;
+
+            var objects = GameObject.FindObjectsByType<MonoBehaviour>().OfType<IDataHandler<T>>();
+            var data = (T)((SaveData)Data[dataName])[typeof(T).Name].Get();
+
+            foreach (var obj in objects)
+            {
+                obj.HandleData(data);
+            }
+        }
+        /// <summary>
+        /// Provides all IDataHandler<T>'s with data of type T with the corresponding data name from the given file path.
+        /// </summary>
+        public static T LoadAll<T>(string dataName, string fileName, int profile = 0) 
+        {
+            // Load data
+            T saveData = _dataHandler.Load<T>(fileName + profile);
+
+            if (saveData == null)
+            {
+                Debug.LogWarning($"No data of type {typeof(T).Name} found at {Application.persistentDataPath + fileName + profile}.dat, initial data needs to be created.");
+                return default;
+            }
+
+            Data[dataName] = saveData;
+
+            var objects = GameObject.FindObjectsByType<MonoBehaviour>().OfType<IDataHandler<T>>();
+            var data = (T)Data[dataName];
+
+            foreach (var obj in objects)
+            {
+                obj.HandleData(data);
+            }
 
             return data;
         }
 
-        public static T Get<T>()
+        /// <summary>
+        /// Attempts to get SaveData of type T and the given data name.
+        /// </summary>
+        public static T GetData<T>(string dataName) where T : SaveDataBase
         {
-            if (!Data.ContainsKey(typeof(T)))
+            if (!Data.ContainsKey(dataName))
             {
-                Debug.LogError($"SaveManager does not contain data of type {typeof(T).Name}");
+                Debug.LogWarning($"SaveManager does not contain data of type {typeof(T).Name}");
                 return default;
             }
-            return (T)Data[typeof(T)];
+            return (T)((SaveData)Data[dataName])[typeof(T).Name];
+        }
+        /// <summary>
+        /// Attempts to get data of type T and the given data name.
+        /// </summary>
+        public static T Get<T>(string dataName)
+        {
+            if (!Data.ContainsKey(dataName))
+            {
+                Debug.LogWarning($"SaveManager does not contain data of type {typeof(T).Name}");
+                return default;
+            }
+            return (T)Data[dataName];
         }
     }
 }

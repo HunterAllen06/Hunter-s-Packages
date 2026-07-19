@@ -9,24 +9,29 @@ namespace HunterAllen.Player
         Transform _cameraTransform;
 
         [SerializeField]
-        Transform _playerBodyTransform;
+        CapsuleCollider _playerCollider;
 
         [Header("Parameters")]
         [SerializeField]
         float _sensitivity = 1f;
+        public float Sensitivity { get => _sensitivity; set => _sensitivity = value; }
 
         [SerializeField]
         float _smoothTime = 0.05f;
+        public float SmoothTime { get => _smoothTime; set => _smoothTime = value; }
 
-        Vector3 _targetLookEulerAngles;
+        [SerializeField]
+        float _headRoom = 0.1f;
 
         [HideInInspector] public bool InvertMouseY { get; set; }
-        Vector2 _lookInput;
 
-        [HideInInspector] public float RotX;
-        [HideInInspector] public float RotY;
-        [HideInInspector] public float RotXLerped;
-        [HideInInspector] public float RotYLerped;
+        Vector2 _lookInput;
+        Vector3 _targetLookEulerAngles;
+
+        float _rotX;
+        float _rotY;
+        float _rotXLerped;
+        float _rotYLerped;
 
         float _mouseX;
         float _mouseY;
@@ -35,11 +40,12 @@ namespace HunterAllen.Player
 
         void Update()
         {
-            RotXLerped = Mathf.SmoothDamp(RotXLerped, RotX, ref _rotXVelocity, _smoothTime);
-            RotYLerped = Mathf.SmoothDamp(RotYLerped, RotY, ref _rotYVelocity, _smoothTime);
+            _rotXLerped = Mathf.SmoothDamp(_rotXLerped, _rotX, ref _rotXVelocity, _smoothTime);
+            _rotYLerped = Mathf.SmoothDamp(_rotYLerped, _rotY, ref _rotYVelocity, _smoothTime);
             
-            _cameraTransform.localRotation = Quaternion.Euler(RotXLerped * Vector3.right);
-            _playerBodyTransform.localRotation = Quaternion.Euler(RotYLerped * Vector3.up);
+            _cameraTransform.localRotation = Quaternion.Euler(_rotXLerped * Vector3.right);
+            _playerCollider.transform.localRotation = Quaternion.Euler(_rotYLerped * Vector3.up);
+            _cameraTransform.localPosition = (_playerCollider.height * 0.5f - _headRoom) * Vector3.up;
         }
         
         public void ApplyLookInput(Vector2 input)
@@ -50,9 +56,9 @@ namespace HunterAllen.Player
             _mouseX = input.x;
             _mouseY = input.y * (InvertMouseY ? -1 : 1);
 
-            RotX -= _mouseY * _sensitivity;
-            RotY += _mouseX * _sensitivity;
-            RotX = Mathf.Clamp(RotX, -89f, 89f);
+            _rotX -= _mouseY * _sensitivity;
+            _rotY += _mouseX * _sensitivity;
+            _rotX = Mathf.Clamp(_rotX, -89f, 89f);
         }
     }
 }

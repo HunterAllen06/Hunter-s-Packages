@@ -83,7 +83,8 @@ MonoBehaviour:
   _maxStepHeight: 0.5
   _maxSlopeAngle: 40
   _defaultHeight: 1.25
-  _crouchHeight: 0.8
+  _crouchHeight: 0.3
+  _crouchSmoothSpeed: 25
 --- !u!114 &5286150579665919164
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -97,9 +98,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _cameraTransform: {fileID: 4686990253405015167}
-  _playerBodyTransform: {fileID: 8308521631056571662}
+  _playerCollider: {fileID: 5423744661857521568}
   _sensitivity: 0.5
   _smoothTime: 0.02
+  _headRoom: 0.1
   RotX: 0
   RotY: 0
   RotXLerped: 0

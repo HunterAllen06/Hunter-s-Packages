@@ -7,10 +7,10 @@ namespace HunterAllen.Player
     {
         [Header("Components")]
         [SerializeField]
-        protected PlayerMover _playerMover;
+        public PlayerMover _playerMover;
 
         [SerializeField]
-        protected PlayerCamera _playerCamera;
+        public PlayerCamera _playerCamera;
 
         public virtual void ProvideMoveInput(Vector2 input)
         {

@@ -80,12 +80,22 @@ namespace HunterAllen.Player
         [Range(0.1f, 1f)]
         float _crouchHeight = 0.8f;
 
+        [SerializeField]
+        float _crouchSmoothSpeed = 8f;
+
         Vector2 _moveInput;
         bool _isSprinting;
         bool _isCrouching;
+        bool _isAllowedToStand;
         float _maxSlopeDot;
-        RaycastHit[] _hitResults = new RaycastHit[4];
+        RaycastHit[] _groundHitResults = new RaycastHit[4];
+        RaycastHit[] _headCheckResults = new RaycastHit[1];
         Ray _ray;
+
+        void Update()
+        {
+            HandleCrouchInput();
+        }
 
         void FixedUpdate()
         {
@@ -108,39 +118,29 @@ namespace HunterAllen.Player
 
             _ray = new(_collider.transform.position - (_collider.height * 0.5f - _collider.radius) * Vector3.up + _directionBias * multiplier * direction.normalized, Vector3.down);
 
-            _hitResults = new RaycastHit[4];
-            if (Physics.SphereCastNonAlloc(_ray, _collider.radius * _springRadius, _hitResults, _springRaycastDistance, _groundLayer) == 0)
-            {
-                return;
-            }
+            _groundHitResults = new RaycastHit[4];
+            int hits = Physics.SphereCastNonAlloc(_ray, _collider.radius * _springRadius, _groundHitResults, _springRaycastDistance, _groundLayer, QueryTriggerInteraction.Ignore);
+            if (hits == 0) return;
 
-            foreach (var hit_ in _hitResults)
-            {
-                if (hit_.collider == null)
-                {
-                    continue;
-                }
-            }
-            
-            RaycastHit hit = _hitResults.OrderBy(x => (new Vector2(x.point.x, x.point.z) - new Vector2(_collider.transform.position.x, _collider.transform.position.z)).magnitude).ToArray()[0];
+            RaycastHit hit = _groundHitResults.OrderBy(x => (new Vector2(x.point.x, x.point.z) - new Vector2(_collider.transform.position.x, _collider.transform.position.z)).magnitude).ToArray()[0];
             RaycastHit initialHit = hit;
             float feet = hit.collider ? hit.point.y : _collider.transform.position.y - _collider.height - _springHeight;
 
-            foreach (var hit_ in _hitResults)
+            for (int i = 0; i < hits; i++)
             {
-                if (
-                    hit_.collider != null &&
-                    (hit.collider == null || hit_.distance < hit.distance) &&
-                    hit_.point != Vector3.zero &&
-                    hit_.point.y - feet < _maxStepHeight + 0.05f &&
-                    Vector3.Dot(hit_.normal, Vector3.up) > _maxSlopeDot)
+                var h = _groundHitResults[i];
+
+                if (h.collider != null &&
+                    (hit.collider == null || h.distance < hit.distance) &&
+                    h.point != Vector3.zero &&
+                    h.point.y - feet < _maxStepHeight + 0.05f &&
+                    Vector3.Dot(h.normal, Vector3.up) > _maxSlopeDot)
                 {
-                    hit = hit_;
+                    hit = h;
                 }
             }
 
             multiplier = _isSprinting ? _springForceSprintMultiplier : 1f;
-
             float force = (_springHeight - hit.distance) * _springForce * multiplier - (velocity.y * _springDamp);
             _rigidbody.AddForce(force * Time.fixedDeltaTime * Vector3.up);
         }
@@ -148,7 +148,8 @@ namespace HunterAllen.Player
         {
             float targetSpeed = _isSprinting ? _sprintSpeed : _defaultSpeed * (_isCrouching ? _crouchSpeedMultiplier : 1f);
 
-            Vector3 forward = Vector3.ProjectOnPlane(_orientation.forward, Vector3.up);
+            Vector3 forward = _orientation.forward;
+            forward.y = 0;
             Vector3 direction = input.y * forward + input.x * _orientation.right;
 
 #if UNITY_6000_0_OR_NEWER
@@ -162,6 +163,15 @@ namespace HunterAllen.Player
 
             _rigidbody.AddForce(force);
         }
+
+        void HandleCrouchInput()
+        {
+            if (!_isCrouching && !CheckHeadRoom()) return;
+
+            float newHeight = _isCrouching ? _crouchHeight : _defaultHeight;
+            _collider.height = Mathf.Lerp(_collider.height, newHeight, 1f - Mathf.Exp(-Time.deltaTime * _crouchSmoothSpeed));
+        }
+        bool CheckHeadRoom() => Physics.SphereCastNonAlloc(_rigidbody.position + _collider.height * 0.55f * Vector3.up, _collider.radius * 0.99f, Vector3.up, _headCheckResults, _defaultHeight - _collider.height + 0.1f, _groundLayer, QueryTriggerInteraction.Ignore) == 0;
 
         public void SetMoveInput(Vector2 input) => _moveInput = input;
         public void SetSprint(bool isSprinting) => _isSprinting = isSprinting;
