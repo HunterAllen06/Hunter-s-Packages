@@ -37,7 +37,7 @@ namespace HunterAllen.SaveSystem
         /// </summary>
         public static void Save(string dataName, string fileName, int profile = 0)
         {
-            Save(Get<SaveData>(dataName), fileName, profile);
+            Save(Get(dataName), fileName, profile);
         }
         /// <summary>
         /// Saves data to the given file path.
@@ -179,6 +179,18 @@ namespace HunterAllen.SaveSystem
                 return default;
             }
             return (T)Data[dataName];
+        }
+        /// <summary>
+        /// Attempts to get data of type T and the given data name.
+        /// </summary>
+        public static object Get(string dataName)
+        {
+            if (!Data.ContainsKey(dataName))
+            {
+                Debug.LogWarning($"SaveManager does not contain data with name {dataName}");
+                return default;
+            }
+            return Data[dataName];
         }
     }
 }

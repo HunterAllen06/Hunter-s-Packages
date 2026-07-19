@@ -47,8 +47,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f84ecbfc346f1264ba2c55734ac6a3a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerMover: {fileID: 7714332993399250804}
-  _playerCamera: {fileID: 5286150579665919164}
+  PlayerMover: {fileID: 7714332993399250804}
+  PlayerCamera: {fileID: 5286150579665919164}
 --- !u!114 &7714332993399250804
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61,8 +61,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 278b2f180a6c9fb498879493c768f4fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rigidbody: {fileID: 4558629624417084742}
-  _collider: {fileID: 5423744661857521568}
+  Rigidbody: {fileID: 4558629624417084742}
+  Collider: {fileID: 5423744661857521568}
   _orientation: {fileID: 8308521631056571662}
   _cameraTransform: {fileID: 4686990253405015167}
   _accelerationStrength: 5
@@ -102,10 +102,6 @@ MonoBehaviour:
   _sensitivity: 0.5
   _smoothTime: 0.02
   _headRoom: 0.1
-  RotX: 0
-  RotY: 0
-  RotXLerped: 0
-  RotYLerped: 0
 --- !u!1 &4813766582857676165
 GameObject:
   m_ObjectHideFlags: 0

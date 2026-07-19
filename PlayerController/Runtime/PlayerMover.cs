@@ -7,10 +7,10 @@ namespace HunterAllen.Player
     {
         [Header("Components")]
         [SerializeField]
-        Rigidbody _rigidbody;
+        public Rigidbody Rigidbody;
 
         [SerializeField]
-        CapsuleCollider _collider;
+        public CapsuleCollider Collider;
 
         [SerializeField]
         Transform _orientation;
@@ -106,7 +106,7 @@ namespace HunterAllen.Player
         void ApplySpringForce()
         {
 #if UNITY_6000_0_OR_NEWER
-            Vector3 velocity = _rigidbody.linearVelocity;
+            Vector3 velocity = Rigidbody.linearVelocity;
 #else
             Vector3 velocity = _rigidbody.velocity;
 #endif
@@ -116,15 +116,15 @@ namespace HunterAllen.Player
 
             float multiplier = _isSprinting ? _directionBiasSprintMultiplier : 1f;
 
-            _ray = new(_collider.transform.position - (_collider.height * 0.5f - _collider.radius) * Vector3.up + _directionBias * multiplier * direction.normalized, Vector3.down);
+            _ray = new(Collider.transform.position - (Collider.height * 0.5f - Collider.radius) * Vector3.up + _directionBias * multiplier * direction.normalized, Vector3.down);
 
             _groundHitResults = new RaycastHit[4];
-            int hits = Physics.SphereCastNonAlloc(_ray, _collider.radius * _springRadius, _groundHitResults, _springRaycastDistance, _groundLayer, QueryTriggerInteraction.Ignore);
+            int hits = Physics.SphereCastNonAlloc(_ray, Collider.radius * _springRadius, _groundHitResults, _springRaycastDistance, _groundLayer, QueryTriggerInteraction.Ignore);
             if (hits == 0) return;
 
-            RaycastHit hit = _groundHitResults.OrderBy(x => (new Vector2(x.point.x, x.point.z) - new Vector2(_collider.transform.position.x, _collider.transform.position.z)).magnitude).ToArray()[0];
+            RaycastHit hit = _groundHitResults.OrderBy(x => (new Vector2(x.point.x, x.point.z) - new Vector2(Collider.transform.position.x, Collider.transform.position.z)).magnitude).ToArray()[0];
             RaycastHit initialHit = hit;
-            float feet = hit.collider ? hit.point.y : _collider.transform.position.y - _collider.height - _springHeight;
+            float feet = hit.collider ? hit.point.y : Collider.transform.position.y - Collider.height - _springHeight;
 
             for (int i = 0; i < hits; i++)
             {
@@ -142,7 +142,7 @@ namespace HunterAllen.Player
 
             multiplier = _isSprinting ? _springForceSprintMultiplier : 1f;
             float force = (_springHeight - hit.distance) * _springForce * multiplier - (velocity.y * _springDamp);
-            _rigidbody.AddForce(force * Time.fixedDeltaTime * Vector3.up);
+            Rigidbody.AddForce(force * Time.fixedDeltaTime * Vector3.up);
         }
         void ApplyMovementForce(Vector2 input)
         {
@@ -153,7 +153,7 @@ namespace HunterAllen.Player
             Vector3 direction = input.y * forward + input.x * _orientation.right;
 
 #if UNITY_6000_0_OR_NEWER
-            Vector3 velocity = _rigidbody.linearVelocity;
+            Vector3 velocity = Rigidbody.linearVelocity;
 #else
             Vector3 velocity = _rigidbody.velocity;
 #endif
@@ -161,7 +161,7 @@ namespace HunterAllen.Player
             velocity.y = 0;
             Vector3 force = _accelerationStrength * (targetSpeed * direction - velocity);
 
-            _rigidbody.AddForce(force);
+            Rigidbody.AddForce(force);
         }
 
         void HandleCrouchInput()
@@ -169,9 +169,9 @@ namespace HunterAllen.Player
             if (!_isCrouching && !CheckHeadRoom()) return;
 
             float newHeight = _isCrouching ? _crouchHeight : _defaultHeight;
-            _collider.height = Mathf.Lerp(_collider.height, newHeight, 1f - Mathf.Exp(-Time.deltaTime * _crouchSmoothSpeed));
+            Collider.height = Mathf.Lerp(Collider.height, newHeight, 1f - Mathf.Exp(-Time.deltaTime * _crouchSmoothSpeed));
         }
-        bool CheckHeadRoom() => Physics.SphereCastNonAlloc(_rigidbody.position + _collider.height * 0.55f * Vector3.up, _collider.radius * 0.99f, Vector3.up, _headCheckResults, _defaultHeight - _collider.height + 0.1f, _groundLayer, QueryTriggerInteraction.Ignore) == 0;
+        bool CheckHeadRoom() => Physics.SphereCastNonAlloc(Rigidbody.position + Collider.height * 0.55f * Vector3.up, Collider.radius * 0.99f, Vector3.up, _headCheckResults, _defaultHeight - Collider.height + 0.1f, _groundLayer, QueryTriggerInteraction.Ignore) == 0;
 
         public void SetMoveInput(Vector2 input) => _moveInput = input;
         public void SetSprint(bool isSprinting) => _isSprinting = isSprinting;
@@ -179,10 +179,10 @@ namespace HunterAllen.Player
 
         void OnValidate()
         {
-            _collider.height = _defaultHeight;
-            Vector3 newPos = _collider.transform.position;
-            newPos.y = _collider.height * 0.5f + _springHeight;
-            _collider.transform.position = newPos;
+            Collider.height = _defaultHeight;
+            Vector3 newPos = Collider.transform.position;
+            newPos.y = Collider.height * 0.5f + _springHeight;
+            Collider.transform.position = newPos;
             _cameraTransform.localPosition = (_defaultHeight * 0.5f - 0.1f) * Vector3.up;
             _maxSlopeDot = 1f - (_maxSlopeAngle / 90f);
         }
