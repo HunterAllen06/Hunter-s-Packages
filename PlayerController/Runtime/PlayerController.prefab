@@ -63,28 +63,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Rigidbody: {fileID: 4558629624417084742}
   Collider: {fileID: 5423744661857521568}
-  _orientation: {fileID: 8308521631056571662}
-  _cameraTransform: {fileID: 4686990253405015167}
-  _accelerationStrength: 5
-  _defaultSpeed: 3
-  _sprintSpeed: 8
-  _crouchSpeedMultiplier: 0.5
-  _springForce: 25000
-  _springForceSprintMultiplier: 1.8
-  _springDamp: 2500
-  _springHeight: 0.55
-  _springRaycastDistance: 1
-  _springRadius: 0.9
-  _directionBias: 0.2
-  _directionBiasSprintMultiplier: 1.5
-  _groundLayer:
+  Orientation: {fileID: 8308521631056571662}
+  CameraTransform: {fileID: 4686990253405015167}
+  AccelerationStrength: 10
+  DefaultSpeed: 3
+  SprintSpeed: 8
+  CrouchSpeedMultiplier: 0.5
+  SpringForce: 25000
+  SpringForceSprintMultiplier: 1.8
+  SpringDamp: 2500
+  SpringHeight: 0.55
+  SpringRaycastDistance: 1
+  SpringRadius: 0.9
+  DirectionBias: 0.2
+  DirectionBiasSprintMultiplier: 1.5
+  GroundLayer:
     serializedVersion: 2
     m_Bits: 1
-  _maxStepHeight: 0.5
-  _maxSlopeAngle: 40
-  _defaultHeight: 1.25
-  _crouchHeight: 0.3
-  _crouchSmoothSpeed: 25
+  MaxStepHeight: 0.5
+  MaxSlopeAngle: 40
+  DefaultHeight: 1.25
+  CrouchHeight: 0.3
+  CrouchSmoothSpeed: 25
+  MoveInput: {x: 0, y: 0}
+  IsSprinting: 0
+  IsCrouching: 0
 --- !u!114 &5286150579665919164
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -102,6 +105,8 @@ MonoBehaviour:
   _sensitivity: 0.5
   _smoothTime: 0.02
   _headRoom: 0.1
+  RotX: 0
+  RotY: 0
 --- !u!1 &4813766582857676165
 GameObject:
   m_ObjectHideFlags: 0

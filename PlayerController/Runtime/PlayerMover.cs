@@ -6,87 +6,53 @@ namespace HunterAllen.Player
     public class PlayerMover : MonoBehaviour
     {
         [Header("Components")]
-        [SerializeField]
         public Rigidbody Rigidbody;
-
-        [SerializeField]
         public CapsuleCollider Collider;
-
-        [SerializeField]
-        Transform _orientation;
-
-        [SerializeField]
-        Transform _cameraTransform;
+        public Transform Orientation;
+        public Transform CameraTransform;
 
         [Header("Acceleration")]
-        [SerializeField]
-        float _accelerationStrength = 1.5f;
+        public float AccelerationStrength = 1.5f;
 
         [Header("Speed")]
-        [SerializeField]
-        float _defaultSpeed = 1.5f;
-
-        [SerializeField]
-        float _sprintSpeed = 3f;
-
-        [SerializeField]
-        float _crouchSpeedMultiplier = 0.5f;
+        public float DefaultSpeed = 1.5f;
+        public float SprintSpeed = 3f;
+        public float CrouchSpeedMultiplier = 0.5f;
 
         [Header("Spring")]
-        [SerializeField]
-        float _springForce = 1f;
-
-        [SerializeField]
-        float _springForceSprintMultiplier = 2f;
-
-        [SerializeField]
-        float _springDamp = 1f;
+        public float SpringForce = 1f;
+        public float SpringForceSprintMultiplier = 2f;
+        public float SpringDamp = 1f;
 
         [Space]
-        [SerializeField]
-        float _springHeight = 0.25f;
-
-        [SerializeField]
-        float _springRaycastDistance = 0.5f;
+        public float SpringHeight = 0.25f;
+        public float SpringRaycastDistance = 0.5f;
 
         [Range(0.01f, 1f)]
-        [SerializeField]
-        float _springRadius = 0.5f;
+        public float SpringRadius = 0.5f;
         
         [Range(0f, 1f)]
-        [SerializeField]
-        float _directionBias = 0.2f;
-        
-        [SerializeField]
-        float _directionBiasSprintMultiplier = 2f;
-
-        [SerializeField]
-        LayerMask _groundLayer;
+        public float DirectionBias = 0.2f;
+        public float DirectionBiasSprintMultiplier = 2f;
+        public LayerMask GroundLayer;
 
         [Header("Steps and Slopes")]
-        [SerializeField]
-        float _maxStepHeight = 0.5f;
+        public float MaxStepHeight = 0.5f;
 
         [Range(1f, 89f)]
-        [SerializeField]
-        float _maxSlopeAngle = 40f;
+        public float MaxSlopeAngle = 40f;
         
         [Header("Crouching")]
         [Range(0.1f, 3f)]
-        [SerializeField]
-        float _defaultHeight = 1.5f;
+        public float DefaultHeight = 1.5f;
 
-        [SerializeField]
         [Range(0.1f, 1f)]
-        float _crouchHeight = 0.8f;
+        public float CrouchHeight = 0.8f;
+        public float CrouchSmoothSpeed = 8f;
 
-        [SerializeField]
-        float _crouchSmoothSpeed = 8f;
-
-        Vector2 _moveInput;
-        bool _isSprinting;
-        bool _isCrouching;
-        bool _isAllowedToStand;
+        public Vector2 MoveInput;
+        public bool IsSprinting;
+        public bool IsCrouching;
         float _maxSlopeDot;
         RaycastHit[] _groundHitResults = new RaycastHit[4];
         RaycastHit[] _headCheckResults = new RaycastHit[1];
@@ -100,7 +66,7 @@ namespace HunterAllen.Player
         void FixedUpdate()
         {
             ApplySpringForce();
-            ApplyMovementForce(_moveInput);
+            ApplyMovementForce(MoveInput);
         }
 
         void ApplySpringForce()
@@ -114,43 +80,54 @@ namespace HunterAllen.Player
             direction.y = 0;
             direction = direction.magnitude > 0.2f ? direction : Vector3.zero;
 
-            float multiplier = _isSprinting ? _directionBiasSprintMultiplier : 1f;
+            float multiplier = IsSprinting ? DirectionBiasSprintMultiplier : 1f;
 
-            _ray = new(Collider.transform.position - (Collider.height * 0.5f - Collider.radius) * Vector3.up + _directionBias * multiplier * direction.normalized, Vector3.down);
+            _ray = new(Collider.transform.position - (Collider.height * 0.5f - Collider.radius) * Vector3.up + DirectionBias * multiplier * direction.normalized, Vector3.down);
 
-            _groundHitResults = new RaycastHit[4];
-            int hits = Physics.SphereCastNonAlloc(_ray, Collider.radius * _springRadius, _groundHitResults, _springRaycastDistance, _groundLayer, QueryTriggerInteraction.Ignore);
+            int hits = Physics.SphereCastNonAlloc(_ray, Collider.radius * SpringRadius, _groundHitResults, SpringRaycastDistance, GroundLayer, QueryTriggerInteraction.Ignore);
             if (hits == 0) return;
 
-            RaycastHit hit = _groundHitResults.OrderBy(x => (new Vector2(x.point.x, x.point.z) - new Vector2(Collider.transform.position.x, Collider.transform.position.z)).magnitude).ToArray()[0];
-            RaycastHit initialHit = hit;
-            float feet = hit.collider ? hit.point.y : Collider.transform.position.y - Collider.height - _springHeight;
-
+            // Select hit closest to the feet
+            // This shit EATS all the ram - 1.0 kb GC allocation :(
+            // RaycastHit hit = _groundHitResults.OrderBy(x => (new Vector2(x.point.x, x.point.z) - new Vector2(Collider.transform.position.x, Collider.transform.position.z)).magnitude).ToArray()[0];
+            
+            // New method
+            RaycastHit hit = default;
+            float pm = SpringRaycastDistance;
+            float feet = 0;
             for (int i = 0; i < hits; i++)
             {
+                if (hit.point == default)
+                {
+                    hit = _groundHitResults[i];
+                    continue;
+                }
                 var h = _groundHitResults[i];
-
+                var c = Collider.transform.position;
+                var m = (new Vector2(h.point.x, h.point.z) - new Vector2(c.x, c.z)).magnitude;
+                feet = h.collider ? h.point.y : Collider.transform.position.y - Collider.height - SpringHeight;
                 if (h.collider != null &&
                     (hit.collider == null || h.distance < hit.distance) &&
                     h.point != Vector3.zero &&
-                    h.point.y - feet < _maxStepHeight + 0.05f &&
-                    Vector3.Dot(h.normal, Vector3.up) > _maxSlopeDot)
+                    h.point.y - feet < MaxStepHeight + 0.05f &&
+                    Vector3.Dot(h.normal, Vector3.up) > _maxSlopeDot &&
+                    m < pm)
                 {
                     hit = h;
                 }
             }
 
-            multiplier = _isSprinting ? _springForceSprintMultiplier : 1f;
-            float force = (_springHeight - hit.distance) * _springForce * multiplier - (velocity.y * _springDamp);
+            multiplier = IsSprinting ? SpringForceSprintMultiplier : 1f;
+            float force = (SpringHeight - hit.distance) * SpringForce * multiplier - (velocity.y * SpringDamp);
             Rigidbody.AddForce(force * Time.fixedDeltaTime * Vector3.up);
         }
         void ApplyMovementForce(Vector2 input)
         {
-            float targetSpeed = _isSprinting ? _sprintSpeed : _defaultSpeed * (_isCrouching ? _crouchSpeedMultiplier : 1f);
+            float targetSpeed = IsSprinting ? SprintSpeed : DefaultSpeed * (IsCrouching ? CrouchSpeedMultiplier : 1f);
 
-            Vector3 forward = _orientation.forward;
+            Vector3 forward = Orientation.forward;
             forward.y = 0;
-            Vector3 direction = input.y * forward + input.x * _orientation.right;
+            Vector3 direction = input.y * forward + input.x * Orientation.right;
 
 #if UNITY_6000_0_OR_NEWER
             Vector3 velocity = Rigidbody.linearVelocity;
@@ -159,32 +136,32 @@ namespace HunterAllen.Player
 #endif
 
             velocity.y = 0;
-            Vector3 force = _accelerationStrength * (targetSpeed * direction - velocity);
+            Vector3 force = AccelerationStrength * (targetSpeed * direction - velocity);
 
             Rigidbody.AddForce(force);
         }
 
         void HandleCrouchInput()
         {
-            if (!_isCrouching && !CheckHeadRoom()) return;
+            if (!IsCrouching && !CheckHeadRoom()) return;
 
-            float newHeight = _isCrouching ? _crouchHeight : _defaultHeight;
-            Collider.height = Mathf.Lerp(Collider.height, newHeight, 1f - Mathf.Exp(-Time.deltaTime * _crouchSmoothSpeed));
+            float newHeight = IsCrouching ? CrouchHeight : DefaultHeight;
+            Collider.height = Mathf.Lerp(Collider.height, newHeight, 1f - Mathf.Exp(-Time.deltaTime * CrouchSmoothSpeed));
         }
-        bool CheckHeadRoom() => Physics.SphereCastNonAlloc(Rigidbody.position + Collider.height * 0.55f * Vector3.up, Collider.radius * 0.99f, Vector3.up, _headCheckResults, _defaultHeight - Collider.height + 0.1f, _groundLayer, QueryTriggerInteraction.Ignore) == 0;
+        bool CheckHeadRoom() => Physics.SphereCastNonAlloc(Rigidbody.position + Collider.height * 0.55f * Vector3.up, Collider.radius * 0.99f, Vector3.up, _headCheckResults, DefaultHeight - Collider.height + 0.1f, GroundLayer, QueryTriggerInteraction.Ignore) == 0;
 
-        public void SetMoveInput(Vector2 input) => _moveInput = input;
-        public void SetSprint(bool isSprinting) => _isSprinting = isSprinting;
-        public void SetCrouch(bool isSprinting) => _isCrouching = isSprinting;
+        public void SetMoveInput(Vector2 input) => MoveInput = input;
+        public void SetSprint(bool isSprinting) => IsSprinting = isSprinting;
+        public void SetCrouch(bool isSprinting) => IsCrouching = isSprinting;
 
         void OnValidate()
         {
-            Collider.height = _defaultHeight;
+            Collider.height = DefaultHeight;
             Vector3 newPos = Collider.transform.position;
-            newPos.y = Collider.height * 0.5f + _springHeight;
+            newPos.y = Collider.height * 0.5f + SpringHeight;
             Collider.transform.position = newPos;
-            _cameraTransform.localPosition = (_defaultHeight * 0.5f - 0.1f) * Vector3.up;
-            _maxSlopeDot = 1f - (_maxSlopeAngle / 90f);
+            CameraTransform.localPosition = (DefaultHeight * 0.5f - 0.1f) * Vector3.up;
+            _maxSlopeDot = 1f - (MaxSlopeAngle / 90f);
         }
     }
 }

@@ -28,8 +28,8 @@ namespace HunterAllen.Player
         Vector2 _lookInput;
         Vector3 _targetLookEulerAngles;
 
-        float _rotX;
-        float _rotY;
+        [HideInInspector] public float RotX;
+        [HideInInspector] public float RotY;
         float _rotXLerped;
         float _rotYLerped;
 
@@ -40,8 +40,8 @@ namespace HunterAllen.Player
 
         void Update()
         {
-            _rotXLerped = Mathf.SmoothDamp(_rotXLerped, _rotX, ref _rotXVelocity, _smoothTime);
-            _rotYLerped = Mathf.SmoothDamp(_rotYLerped, _rotY, ref _rotYVelocity, _smoothTime);
+            _rotXLerped = Mathf.SmoothDamp(_rotXLerped, RotX, ref _rotXVelocity, _smoothTime);
+            _rotYLerped = Mathf.SmoothDamp(_rotYLerped, RotY, ref _rotYVelocity, _smoothTime);
             
             _cameraTransform.localRotation = Quaternion.Euler(_rotXLerped * Vector3.right);
             _playerCollider.transform.localRotation = Quaternion.Euler(_rotYLerped * Vector3.up);
@@ -56,9 +56,9 @@ namespace HunterAllen.Player
             _mouseX = input.x;
             _mouseY = input.y * (InvertMouseY ? -1 : 1);
 
-            _rotX -= _mouseY * _sensitivity;
-            _rotY += _mouseX * _sensitivity;
-            _rotX = Mathf.Clamp(_rotX, -89f, 89f);
+            RotX -= _mouseY * _sensitivity;
+            RotY += _mouseX * _sensitivity;
+            RotX = Mathf.Clamp(RotX, -89f, 89f);
         }
     }
 }
