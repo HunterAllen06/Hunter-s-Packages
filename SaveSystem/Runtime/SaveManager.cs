@@ -19,7 +19,7 @@ namespace HunterAllen.SaveSystem
         public static void Initialize()
         {
             Data = new();
-            _dataHandler = new FileDataHandler(Application.persistentDataPath);
+            _dataHandler = new FileDataHandler(Application.persistentDataPath + "/saves/");
         }
         
         /// <summary>
@@ -77,11 +77,11 @@ namespace HunterAllen.SaveSystem
         /// </summary>
         public static SaveData Load(string dataName, string fileName, int profile = 0)
         {
-            var data = _dataHandler.Load<SaveData>(fileName + profile);
+            var data = _dataHandler.Load<SaveData>(fileName + profile, out bool successful);
 
-            if (data == null)
+            if (!successful)
             {
-                Debug.LogWarning($"No file with name {Application.persistentDataPath + fileName + profile}.dat found, initial data needs to be created.");
+                Debug.LogWarning($"No file with name {Application.persistentDataPath + "/saves/" + fileName + profile}.dat found, initial data needs to be created.");
                 return default;
             }
 
@@ -94,11 +94,11 @@ namespace HunterAllen.SaveSystem
         public static T Load<T>(string dataName, string fileName, int profile = 0)
         {
             // Load data
-            T data = _dataHandler.Load<T>(fileName + profile);
+            T data = _dataHandler.Load<T>(fileName + profile, out bool successful);
 
-            if (data == null)
+            if (!successful)
             {
-                Debug.LogWarning($"No data of type {typeof(T).Name} found at {Application.persistentDataPath + fileName + profile}.dat, initial data needs to be created.");
+                Debug.LogWarning($"No data of type {typeof(T).Name} found at {Application.persistentDataPath + "/saves/" + fileName + profile}.dat, initial data needs to be created.");
                 return default;
             }
 
@@ -111,11 +111,11 @@ namespace HunterAllen.SaveSystem
         /// </summary>
         public static void LoadAllData<T>(string dataName, string fileName, int profile = 0)
         {
-            T saveData = _dataHandler.Load<T>(fileName + profile);
+            T saveData = _dataHandler.Load<T>(fileName + profile, out bool successful);
 
-            if (saveData == null)
+            if (!successful || saveData == null)
             {
-                Debug.LogWarning($"No data of type {typeof(T).Name} found at {Application.persistentDataPath + fileName + profile}.dat, initial data needs to be created.");
+                Debug.LogWarning($"No data of type {typeof(T).Name} found at {Application.persistentDataPath + "/saves/" + fileName + profile}.dat, initial data needs to be created.");
                 return;
             }
 
@@ -135,11 +135,11 @@ namespace HunterAllen.SaveSystem
         public static T LoadAll<T>(string dataName, string fileName, int profile = 0) 
         {
             // Load data
-            T saveData = _dataHandler.Load<T>(fileName + profile);
+            T saveData = _dataHandler.Load<T>(fileName + profile, out bool successful);
 
-            if (saveData == null)
+            if (!successful || saveData == null)
             {
-                Debug.LogWarning($"No data of type {typeof(T).Name} found at {Application.persistentDataPath + fileName + profile}.dat, initial data needs to be created.");
+                Debug.LogWarning($"No data of type {typeof(T).Name} found at {Application.persistentDataPath + "/saves/" + fileName + profile}.dat, initial data needs to be created.");
                 return default;
             }
 
@@ -191,6 +191,23 @@ namespace HunterAllen.SaveSystem
                 return default;
             }
             return Data[dataName];
+        }
+        /// <summary>
+        /// Attempts to get data of type T and the given data name, creates data if it doesn't exist.
+        /// </summary>
+        public static T GetSafe<T>(string dataName, string filePath, int profile = 0)
+        {
+            T t = Get<T>(dataName);
+
+            if (t != null) return t;
+
+            t = Load<T>(dataName, filePath, profile);
+
+            if (t != null) return t;
+
+            t = default(T);
+            New<T>(t, dataName, filePath, profile);
+            return t;
         }
     }
 }

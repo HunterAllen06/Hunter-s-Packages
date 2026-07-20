@@ -3,7 +3,7 @@ namespace HunterAllen.SaveSystem
     public interface IDataSaveHandler
     {
         public void Save<T>(T t, string fileName);
-        public T Load<T>(string fileName);
+        public T Load<T>(string fileName, out bool successful);
     }
     public interface IDataProvider<T>
     {

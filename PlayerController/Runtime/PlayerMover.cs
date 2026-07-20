@@ -125,9 +125,7 @@ namespace HunterAllen.Player
         {
             float targetSpeed = IsSprinting ? SprintSpeed : DefaultSpeed * (IsCrouching ? CrouchSpeedMultiplier : 1f);
 
-            Vector3 forward = Orientation.forward;
-            forward.y = 0;
-            Vector3 direction = input.y * forward + input.x * Orientation.right;
+            Vector3 direction = input.y * Orientation.forward + input.x * Orientation.right;
 
 #if UNITY_6000_0_OR_NEWER
             Vector3 velocity = Rigidbody.linearVelocity;

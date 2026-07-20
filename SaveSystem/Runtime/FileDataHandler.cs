@@ -35,11 +35,12 @@ namespace HunterAllen.SaveSystem
             }
         }
 
-        public T Load<T>(string fileName)
+        public T Load<T>(string fileName, out bool successful)
         {
             string fullPath = Path.Combine(_dataPath, fileName + ".dat");
 
             T data = default;
+            successful = false;
 
             if (File.Exists(fullPath))
             {
@@ -59,6 +60,8 @@ namespace HunterAllen.SaveSystem
                     string dataAsJson = Encoding.UTF8.GetString(Convert.FromBase64String(encryptedData));
                     Debug.Log($"Converting {typeof(T).Name} from Json...");
                     data = JsonUtility.FromJson<T>(dataAsJson);
+                    successful = data != null;
+                    return data;
                 }
                 catch (IOException e)
                 {
@@ -66,7 +69,7 @@ namespace HunterAllen.SaveSystem
                 }
             }
 
-            return data;
+            return default(T);
         }
 
         public FileDataHandler(string filePath)
