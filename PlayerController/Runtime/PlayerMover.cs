@@ -51,8 +51,13 @@ namespace HunterAllen.Player
         public float CrouchSmoothSpeed = 8f;
 
         public Vector2 MoveInput;
+
         public bool IsSprinting;
         public bool IsCrouching;
+        
+        public bool OverrideIsSprinting;
+        public bool OverrideIsCrouching;
+        
         float _maxSlopeDot;
         RaycastHit[] _groundHitResults = new RaycastHit[4];
         RaycastHit[] _headCheckResults = new RaycastHit[1];
@@ -80,7 +85,7 @@ namespace HunterAllen.Player
             direction.y = 0;
             direction = direction.magnitude > 0.2f ? direction : Vector3.zero;
 
-            float multiplier = IsSprinting ? DirectionBiasSprintMultiplier : 1f;
+            float multiplier = IsSprinting || OverrideIsSprinting ? DirectionBiasSprintMultiplier : 1f;
 
             _ray = new(Collider.transform.position - (Collider.height * 0.5f - Collider.radius) * Vector3.up + DirectionBias * multiplier * direction.normalized, Vector3.down);
 
@@ -117,13 +122,13 @@ namespace HunterAllen.Player
                 }
             }
 
-            multiplier = IsSprinting ? SpringForceSprintMultiplier : 1f;
+            multiplier = IsSprinting || OverrideIsSprinting ? SpringForceSprintMultiplier : 1f;
             float force = (SpringHeight - hit.distance) * SpringForce * multiplier - (velocity.y * SpringDamp);
             Rigidbody.AddForce(force * Time.fixedDeltaTime * Vector3.up);
         }
         void ApplyMovementForce(Vector2 input)
         {
-            float targetSpeed = IsSprinting ? SprintSpeed : DefaultSpeed * (IsCrouching ? CrouchSpeedMultiplier : 1f);
+            float targetSpeed = IsSprinting || OverrideIsSprinting ? SprintSpeed : DefaultSpeed * (IsCrouching || OverrideIsCrouching ? CrouchSpeedMultiplier : 1f);
 
             Vector3 direction = input.y * Orientation.forward + input.x * Orientation.right;
 
@@ -141,16 +146,16 @@ namespace HunterAllen.Player
 
         void HandleCrouchInput()
         {
-            if (!IsCrouching && !CheckHeadRoom()) return;
+            if (!IsCrouching && !OverrideIsCrouching && !CheckHeadRoom()) return;
 
-            float newHeight = IsCrouching ? CrouchHeight : DefaultHeight;
+            float newHeight = IsCrouching || OverrideIsCrouching ? CrouchHeight : DefaultHeight;
             Collider.height = Mathf.Lerp(Collider.height, newHeight, 1f - Mathf.Exp(-Time.deltaTime * CrouchSmoothSpeed));
         }
         bool CheckHeadRoom() => Physics.SphereCastNonAlloc(Rigidbody.position + Collider.height * 0.55f * Vector3.up, Collider.radius * 0.99f, Vector3.up, _headCheckResults, DefaultHeight - Collider.height + 0.1f, GroundLayer, QueryTriggerInteraction.Ignore) == 0;
 
         public void SetMoveInput(Vector2 input) => MoveInput = input;
         public void SetSprint(bool isSprinting) => IsSprinting = isSprinting;
-        public void SetCrouch(bool isSprinting) => IsCrouching = isSprinting;
+        public void SetCrouch(bool isCrouching) => IsCrouching = isCrouching;
 
         void OnValidate()
         {
