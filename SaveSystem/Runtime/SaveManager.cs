@@ -3,6 +3,7 @@ using Sirenix.OdinInspector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace HunterAllen.SaveSystem
 {
@@ -38,15 +39,16 @@ namespace HunterAllen.SaveSystem
             @event -= handler.HandleData;
             _onLoadEvents[typeof(T)] = @event;
         }
-        public static void NotifyDataHandlers<T>(T data) where T : IData
+        public static async void NotifyDataHandlers<T>(string dataName, bool waitForFrame = false) where T : IData
         {
+            if (waitForFrame)
+            {
+                await Task.Yield();
+                if (Application.exitCancellationToken.IsCancellationRequested) return;
+            }
+
             var @event = GetNotifyEvent<T>();
-            @event?.Invoke(data);
-        }
-        public static void NotifyDataHandlers<T>() where T : IData
-        {
-            var @event = GetNotifyEvent<T>();
-            var data = (T)Data[typeof(T).Name];
+            var data = (T)Data[dataName];
             @event?.Invoke(data);
         }
 
@@ -85,6 +87,7 @@ namespace HunterAllen.SaveSystem
         public static void Save<T>(T data, string fileName, int profile = 0)
         {
             // Save data
+            Data[typeof(T).Name] = data;
             _dataHandler.Save(data, fileName + profile);
         }
 
@@ -112,22 +115,6 @@ namespace HunterAllen.SaveSystem
             _dataHandler.Save(Data[dataName], fileName + profile);
         }
 
-        /// <summary>
-        /// Attempts to load SaveData with the corresponding data name from the given file path.
-        /// </summary>
-        public static SaveData Load(string dataName, string fileName, int profile = 0)
-        {
-            var data = _dataHandler.Load<SaveData>(fileName + profile, out bool successful);
-
-            if (!successful)
-            {
-                if (DebugLogs) Debug.LogWarning($"No file with name {Application.persistentDataPath + "/saves/" + fileName + profile}.dat found, initial data needs to be created.");
-                return default;
-            }
-
-            Data[dataName] = data;
-            return data;
-        }
         /// <summary>
         /// Attempts to load data with the corresponding data name form the given file path.
         /// </summary>
@@ -164,29 +151,6 @@ namespace HunterAllen.SaveSystem
         }
 
         /// <summary>
-        /// Provides all IDataHandler<T>'s with SaveData of type T with the corresponding data name from the given file path.
-        /// </summary>
-        public static void LoadAllData<T>(string dataName, string fileName, int profile = 0) where T : IData
-        {
-            T saveData = _dataHandler.Load<T>(fileName + profile, out bool successful);
-
-            if (!successful || saveData == null)
-            {
-                if (DebugLogs) Debug.LogWarning($"No data of type {typeof(T).Name} found at {Application.persistentDataPath + "/saves/" + fileName + profile}.dat, initial data needs to be created.");
-                return;
-            }
-
-            Data[dataName] = saveData;
-
-            var objects = GameObject.FindObjectsByType<MonoBehaviour>().OfType<IDataHandler<T>>();
-            var data = (T)((SaveData)Data[dataName])[typeof(T).Name].Get();
-
-            foreach (var obj in objects)
-            {
-                obj.HandleData(data);
-            }
-        }
-        /// <summary>
         /// Provides all IDataHandler<T>'s with data of type T with the corresponding data name from the given file path.
         /// </summary>
         public static T LoadAll<T>(string dataName, string fileName, int profile = 0) where T : IData
@@ -213,18 +177,6 @@ namespace HunterAllen.SaveSystem
             return data;
         }
 
-        /// <summary>
-        /// Attempts to get SaveData of type T and the given data name.
-        /// </summary>
-        public static T GetData<T>(string dataName) where T : SaveDataBase
-        {
-            if (!Data.ContainsKey(dataName))
-            {
-                if (DebugLogs) Debug.LogWarning($"SaveManager does not contain data of type {typeof(T).Name}");
-                return default;
-            }
-            return (T)((SaveData)Data[dataName])[typeof(T).Name];
-        }
         /// <summary>
         /// Attempts to get data of type T and the given data name.
         /// </summary>
