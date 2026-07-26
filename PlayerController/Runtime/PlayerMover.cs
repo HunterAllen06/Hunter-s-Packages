@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -35,6 +36,8 @@ namespace HunterAllen.Player
         public float DirectionBias = 0.2f;
         public float DirectionBiasSprintMultiplier = 2f;
         public LayerMask GroundLayer;
+        public bool TagsAsBlacklist;
+        public List<string> Tags;
 
         [Header("Steps and Slopes")]
         public float MaxStepHeight = 0.5f;
@@ -61,7 +64,6 @@ namespace HunterAllen.Player
         float _maxSlopeDot;
         RaycastHit[] _groundHitResults = new RaycastHit[4];
         RaycastHit[] _headCheckResults = new RaycastHit[1];
-        Ray _ray;
 
         void Update()
         {
@@ -87,9 +89,9 @@ namespace HunterAllen.Player
 
             float multiplier = IsSprinting || OverrideIsSprinting ? DirectionBiasSprintMultiplier : 1f;
 
-            _ray = new(Collider.transform.position - (Collider.height * 0.5f - Collider.radius) * Vector3.up + DirectionBias * multiplier * direction.normalized, Vector3.down);
+            Ray ray = new(Collider.transform.position - (Collider.height * 0.5f - Collider.radius) * Vector3.up + DirectionBias * multiplier * direction.normalized, Vector3.down);
 
-            int hits = Physics.SphereCastNonAlloc(_ray, Collider.radius * SpringRadius, _groundHitResults, SpringRaycastDistance, GroundLayer, QueryTriggerInteraction.Ignore);
+            int hits = Physics.SphereCastNonAlloc(ray, Collider.radius * SpringRadius, _groundHitResults, SpringRaycastDistance, GroundLayer, QueryTriggerInteraction.Ignore);
             if (hits == 0) return;
 
             // Select hit closest to the feet
@@ -97,33 +99,38 @@ namespace HunterAllen.Player
             // RaycastHit hit = _groundHitResults.OrderBy(x => (new Vector2(x.point.x, x.point.z) - new Vector2(Collider.transform.position.x, Collider.transform.position.z)).magnitude).ToArray()[0];
             
             // New method
-            RaycastHit hit = default;
-            float pm = SpringRaycastDistance;
-            float feet = 0;
+            RaycastHit groundHit = default;
+            float previousHorizontalDistance = SpringRaycastDistance;
             for (int i = 0; i < hits; i++)
             {
-                if (hit.point == default)
+                var hit = _groundHitResults[i];
+
+                if (hit.point == default || Tags.Contains(hit.collider.tag) == TagsAsBlacklist)
                 {
-                    hit = _groundHitResults[i];
                     continue;
                 }
-                var h = _groundHitResults[i];
-                var c = Collider.transform.position;
-                var m = (new Vector2(h.point.x, h.point.z) - new Vector2(c.x, c.z)).magnitude;
-                feet = h.collider ? h.point.y : Collider.transform.position.y - Collider.height - SpringHeight;
-                if (h.collider != null &&
-                    (hit.collider == null || h.distance < hit.distance) &&
-                    h.point != Vector3.zero &&
-                    h.point.y - feet < MaxStepHeight + 0.05f &&
-                    Vector3.Dot(h.normal, Vector3.up) > _maxSlopeDot &&
-                    m < pm)
+                if (groundHit.point == default)
                 {
-                    hit = h;
+                    groundHit = _groundHitResults[i];
+                    continue;
+                }
+
+                var colliderPosition = Collider.transform.position;
+                var currentHorizontalDistance = (new Vector2(hit.point.x, hit.point.z) - new Vector2(colliderPosition.x, colliderPosition.z)).magnitude;
+                var hitHeight = ray.origin.y - hit.point.y; // Collider.transform.position.y - Collider.height - SpringHeight;
+
+                if (
+                    hitHeight < MaxStepHeight + 0.05f && // Step height
+                    Vector3.Dot(hit.normal, Vector3.up) > _maxSlopeDot && // Slope
+                    currentHorizontalDistance < previousHorizontalDistance) // Closest to player horizontally
+                    //hit.distance < groundHit.distance &&
+                {
+                    groundHit = hit;
                 }
             }
 
             multiplier = IsSprinting || OverrideIsSprinting ? SpringForceSprintMultiplier : 1f;
-            float force = (SpringHeight - hit.distance) * SpringForce * multiplier - (velocity.y * SpringDamp);
+            float force = (SpringHeight - groundHit.distance) * SpringForce * multiplier - (velocity.y * SpringDamp);
             Rigidbody.AddForce(force * Time.fixedDeltaTime * Vector3.up);
         }
         void ApplyMovementForce(Vector2 input)

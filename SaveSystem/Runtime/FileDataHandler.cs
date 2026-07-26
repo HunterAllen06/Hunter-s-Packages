@@ -12,7 +12,7 @@ namespace HunterAllen.SaveSystem
         public void Save<T>(T t, string fileName)
         {
             string fullPath = Path.Combine(_dataPath, fileName + ".dat");
-            Debug.Log($"Attempting to save {typeof(T).Name} to {fullPath}...");
+            // Debug.Log($"Attempting to save {typeof(T).Name} to {fullPath}...");
 
             try
             {
@@ -48,7 +48,7 @@ namespace HunterAllen.SaveSystem
                 {
                     string encryptedData = "";
 
-                    Debug.Log($"Found {typeof(T).Name} at {fullPath}, loading...");
+                    // Debug.Log($"Found {typeof(T).Name} at {fullPath}, loading...");
                     using (FileStream stream = new(fullPath, FileMode.Open))
                     {
                         using (StreamReader reader = new(stream))
@@ -58,7 +58,7 @@ namespace HunterAllen.SaveSystem
                     }
 
                     string dataAsJson = Encoding.UTF8.GetString(Convert.FromBase64String(encryptedData));
-                    Debug.Log($"Converting {typeof(T).Name} from Json...");
+                    // Debug.Log($"Converting {typeof(T).Name} from Json...");
                     data = JsonUtility.FromJson<T>(dataAsJson);
                     successful = data != null;
                     return data;

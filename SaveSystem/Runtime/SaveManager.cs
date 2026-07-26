@@ -10,6 +10,8 @@ namespace HunterAllen.SaveSystem
     {
         //                     Data Name   Data
         public static Dictionary<string, object> Data = new();
+        static Dictionary<Type, Action<IData>> _onLoadEvents = new();
+        public static bool DebugLogs;
 
         static IDataSaveHandler _dataHandler;
 
@@ -19,9 +21,47 @@ namespace HunterAllen.SaveSystem
         public static void Initialize()
         {
             Data = new();
+            _onLoadEvents = new();
             _dataHandler = new FileDataHandler(Application.persistentDataPath + "/saves/");
         }
+
+        #region Events
+        public static void SubscribeToLoadEvent<T>(this IDataHandler<T> handler) where T : IData
+        {
+            var @event = GetNotifyEvent<T>();
+            @event += handler.HandleData;
+            _onLoadEvents[typeof(T)] = @event;
+        }
+        public static void UnsubscribeToLoadEvent<T>(this IDataHandler<T> handler) where T : IData
+        {
+            var @event = GetNotifyEvent<T>();
+            @event -= handler.HandleData;
+            _onLoadEvents[typeof(T)] = @event;
+        }
+        public static void NotifyDataHandlers<T>(T data) where T : IData
+        {
+            var @event = GetNotifyEvent<T>();
+            @event?.Invoke(data);
+        }
+        public static void NotifyDataHandlers<T>() where T : IData
+        {
+            var @event = GetNotifyEvent<T>();
+            var data = (T)Data[typeof(T).Name];
+            @event?.Invoke(data);
+        }
+
+        static Action<IData> GetNotifyEvent<T>()
+        {
+            if (!_onLoadEvents.TryGetValue(typeof(T), out var @event))
+            {
+                _onLoadEvents.Add(typeof(T), delegate { });
+                @event = _onLoadEvents[typeof(T)];
+            }
+            return @event;
+        }
+        #endregion
         
+        #region Saving and Loading
         /// <summary>
         /// Creates save data at the given file path and assigns the given data name.
         /// </summary>
@@ -29,7 +69,7 @@ namespace HunterAllen.SaveSystem
         {
             Data[dataName] = t;
             Save(t, fileName, profile);
-            Debug.Log($"Created new {typeof(T).Name}.");
+            if (DebugLogs) Debug.Log($"Created new {typeof(T).Name}.");
         }
 
         /// <summary>
@@ -81,7 +121,7 @@ namespace HunterAllen.SaveSystem
 
             if (!successful)
             {
-                Debug.LogWarning($"No file with name {Application.persistentDataPath + "/saves/" + fileName + profile}.dat found, initial data needs to be created.");
+                if (DebugLogs) Debug.LogWarning($"No file with name {Application.persistentDataPath + "/saves/" + fileName + profile}.dat found, initial data needs to be created.");
                 return default;
             }
 
@@ -98,7 +138,24 @@ namespace HunterAllen.SaveSystem
 
             if (!successful)
             {
-                Debug.LogWarning($"No data of type {typeof(T).Name} found at {Application.persistentDataPath + "/saves/" + fileName + profile}.dat, initial data needs to be created.");
+                if (DebugLogs) Debug.LogWarning($"No data of type {typeof(T).Name} found at {Application.persistentDataPath + "/saves/" + fileName + profile}.dat, initial data needs to be created.");
+                return default;
+            }
+
+            Data[dataName] = data;
+            return data;
+        }
+        /// <summary>
+        /// Attempts to load data with the corresponding data name form the given file path.
+        /// </summary>
+        public static T Load<T>(string dataName, string fileName, out bool successful, int profile = 0)
+        {
+            // Load data
+            T data = _dataHandler.Load<T>(fileName + profile, out successful);
+
+            if (!successful)
+            {
+                if (DebugLogs) Debug.LogWarning($"No data of type {typeof(T).Name} found at {Application.persistentDataPath + "/saves/" + fileName + profile}.dat, initial data needs to be created.");
                 return default;
             }
 
@@ -109,13 +166,13 @@ namespace HunterAllen.SaveSystem
         /// <summary>
         /// Provides all IDataHandler<T>'s with SaveData of type T with the corresponding data name from the given file path.
         /// </summary>
-        public static void LoadAllData<T>(string dataName, string fileName, int profile = 0)
+        public static void LoadAllData<T>(string dataName, string fileName, int profile = 0) where T : IData
         {
             T saveData = _dataHandler.Load<T>(fileName + profile, out bool successful);
 
             if (!successful || saveData == null)
             {
-                Debug.LogWarning($"No data of type {typeof(T).Name} found at {Application.persistentDataPath + "/saves/" + fileName + profile}.dat, initial data needs to be created.");
+                if (DebugLogs) Debug.LogWarning($"No data of type {typeof(T).Name} found at {Application.persistentDataPath + "/saves/" + fileName + profile}.dat, initial data needs to be created.");
                 return;
             }
 
@@ -132,14 +189,14 @@ namespace HunterAllen.SaveSystem
         /// <summary>
         /// Provides all IDataHandler<T>'s with data of type T with the corresponding data name from the given file path.
         /// </summary>
-        public static T LoadAll<T>(string dataName, string fileName, int profile = 0) 
+        public static T LoadAll<T>(string dataName, string fileName, int profile = 0) where T : IData
         {
             // Load data
             T saveData = _dataHandler.Load<T>(fileName + profile, out bool successful);
 
             if (!successful || saveData == null)
             {
-                Debug.LogWarning($"No data of type {typeof(T).Name} found at {Application.persistentDataPath + "/saves/" + fileName + profile}.dat, initial data needs to be created.");
+                if (DebugLogs) Debug.LogWarning($"No data of type {typeof(T).Name} found at {Application.persistentDataPath + "/saves/" + fileName + profile}.dat, initial data needs to be created.");
                 return default;
             }
 
@@ -163,7 +220,7 @@ namespace HunterAllen.SaveSystem
         {
             if (!Data.ContainsKey(dataName))
             {
-                Debug.LogWarning($"SaveManager does not contain data of type {typeof(T).Name}");
+                if (DebugLogs) Debug.LogWarning($"SaveManager does not contain data of type {typeof(T).Name}");
                 return default;
             }
             return (T)((SaveData)Data[dataName])[typeof(T).Name];
@@ -175,9 +232,23 @@ namespace HunterAllen.SaveSystem
         {
             if (!Data.ContainsKey(dataName))
             {
-                Debug.LogWarning($"SaveManager does not contain data of type {typeof(T).Name}");
+                if (DebugLogs) Debug.LogWarning($"SaveManager does not contain data of type {typeof(T).Name}");
                 return default;
             }
+            return (T)Data[dataName];
+        }
+        /// <summary>
+        /// Attempts to get data of type T and the given data name.
+        /// </summary>
+        public static T Get<T>(string dataName, out bool successful)
+        {
+            if (!Data.ContainsKey(dataName))
+            {
+                if (DebugLogs) Debug.LogWarning($"SaveManager does not contain data of type {typeof(T).Name}");
+                successful = false;
+                return default;
+            }
+            successful = true;
             return (T)Data[dataName];
         }
         /// <summary>
@@ -187,7 +258,7 @@ namespace HunterAllen.SaveSystem
         {
             if (!Data.ContainsKey(dataName))
             {
-                Debug.LogWarning($"SaveManager does not contain data with name {dataName}");
+                if (DebugLogs) Debug.LogWarning($"SaveManager does not contain data with name {dataName}");
                 return default;
             }
             return Data[dataName];
@@ -197,17 +268,18 @@ namespace HunterAllen.SaveSystem
         /// </summary>
         public static T GetSafe<T>(string dataName, string filePath, int profile = 0)
         {
-            T t = Get<T>(dataName);
+            T t = Get<T>(dataName, out bool successful);
 
-            if (t != null) return t;
+            if (t != null && successful) return t;
 
-            t = Load<T>(dataName, filePath, profile);
+            t = Load<T>(dataName, filePath, out successful, profile);
 
-            if (t != null) return t;
+            if (t != null && successful) return t;
 
             t = default(T);
             New<T>(t, dataName, filePath, profile);
             return t;
         }
+        #endregion
     }
 }
