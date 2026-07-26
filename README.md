@@ -1,4 +1,4 @@
-This repo primarily exists so projects I'm working on that have multiple programmers can share these utility/helper classes.
+This repo primarily exists for personal use, and so projects I'm working on that have multiple programmers can share these utility/helper classes.
 
 Again, please note that these tools are built for my own projects; this means that they could change in functionality at any time. If you plan on using them long term, I strongly suggest sticking to one version or paying close attention to each update/commit.
 
