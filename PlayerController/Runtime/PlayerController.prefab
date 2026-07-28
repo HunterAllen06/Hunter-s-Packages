@@ -80,6 +80,8 @@ MonoBehaviour:
   GroundLayer:
     serializedVersion: 2
     m_Bits: 1
+  TagsAsBlacklist: 0
+  Tags: []
   MaxStepHeight: 0.5
   MaxSlopeAngle: 40
   DefaultHeight: 1.25
@@ -88,6 +90,8 @@ MonoBehaviour:
   MoveInput: {x: 0, y: 0}
   IsSprinting: 0
   IsCrouching: 0
+  OverrideIsSprinting: 0
+  OverrideIsCrouching: 0
 --- !u!114 &5286150579665919164
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -256,7 +260,7 @@ GameObject:
   - component: {fileID: 5423744661857521568}
   - component: {fileID: 4558629624417084742}
   m_Layer: 0
-  m_Name: Capsule
+  m_Name: PlayerBody
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

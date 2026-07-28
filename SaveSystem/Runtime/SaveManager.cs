@@ -41,6 +41,14 @@ namespace HunterAllen.SaveSystem
         }
         public static async void NotifyDataHandlers<T>(string dataName, bool waitForFrame = false) where T : IData
         {
+            if (!Data.ContainsKey(dataName))
+            {
+                Debug.LogWarning($"Data dictionary does not contain key {dataName}.");
+                return;
+            }
+            
+            var data = (T)Data[dataName];
+
             if (waitForFrame)
             {
                 await Task.Yield();
@@ -48,7 +56,6 @@ namespace HunterAllen.SaveSystem
             }
 
             var @event = GetNotifyEvent<T>();
-            var data = (T)Data[dataName];
             @event?.Invoke(data);
         }
 
@@ -96,7 +103,11 @@ namespace HunterAllen.SaveSystem
         /// </summary>
         public static void SaveAllData<T>(string dataName, string fileName, int profile = 0)
         {
+#if UNITY_6000_0_OR_NEWER
             var objects = GameObject.FindObjectsByType<MonoBehaviour>().OfType<IDataProvider<T>>();
+#else
+            var objects = GameObject.FindObjectsOfType<MonoBehaviour>().OfType<IDataProvider<T>>();
+#endif
             var data = (SaveData)Data[dataName];
 
             foreach (var obj in objects)
@@ -166,7 +177,11 @@ namespace HunterAllen.SaveSystem
 
             Data[dataName] = saveData;
 
+#if UNITY_6000_0_OR_NEWER
             var objects = GameObject.FindObjectsByType<MonoBehaviour>().OfType<IDataHandler<T>>();
+#else
+            var objects = GameObject.FindObjectsOfType<MonoBehaviour>().OfType<IDataHandler<T>>();
+#endif
             var data = (T)Data[dataName];
 
             foreach (var obj in objects)

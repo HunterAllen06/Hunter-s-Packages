@@ -81,7 +81,7 @@ namespace HunterAllen.Player
 #if UNITY_6000_0_OR_NEWER
             Vector3 velocity = Rigidbody.linearVelocity;
 #else
-            Vector3 velocity = _rigidbody.velocity;
+            Vector3 velocity = Rigidbody.velocity;
 #endif
             Vector3 direction = velocity;
             direction.y = 0;
@@ -142,7 +142,7 @@ namespace HunterAllen.Player
 #if UNITY_6000_0_OR_NEWER
             Vector3 velocity = Rigidbody.linearVelocity;
 #else
-            Vector3 velocity = _rigidbody.velocity;
+            Vector3 velocity = Rigidbody.velocity;
 #endif
 
             velocity.y = 0;

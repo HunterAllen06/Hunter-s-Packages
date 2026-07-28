@@ -1,10 +1,8 @@
-#if HAS_URP
+#if HAS_URP && UNITY_6000_0_OR_NEWER
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Overlays;
-#if UNITY_6000_0_OR_NEWER
 using UnityEditor.Toolbars;
-#endif
 using UnityEngine.Rendering.Universal;
 
 namespace HunterAllen.Editor
@@ -12,19 +10,15 @@ namespace HunterAllen.Editor
     [Overlay(typeof(SceneView), "Albedo View Toggle", true)]
     public class AlbedoViewToggleOverlay : ToolbarOverlay
     {
-#if UNITY_6000_0_OR_NEWER
         const string _toolbarElementName = "Editor Utility/Albedo View Toggle";
-#endif
         static string _iconName => UniversalRenderPipelineDebugDisplaySettings.Instance.materialSettings.materialDebugMode == DebugMaterialMode.None ? "Lighting" : "SceneViewLighting";
 
-#if UNITY_6000_0_OR_NEWER
         [MainToolbarElement(_toolbarElementName, defaultDockPosition = MainToolbarDockPosition.Middle)]
         static MainToolbarElement CreateBar()
         {
             var icon = EditorGUIUtility.IconContent(_iconName).image as Texture2D;
             return new MainToolbarButton(new MainToolbarContent(icon, "Albedo View Toggle"), OnClick);
         }
-#endif
 
         public static void OnClick()
         {
@@ -40,9 +34,7 @@ namespace HunterAllen.Editor
                 settings.materialSettings.materialDebugMode = DebugMaterialMode.Albedo;
             }
 
-#if UNITY_6000_0_OR_NEWER
             MainToolbar.Refresh(_toolbarElementName);
-#endif
             AlbedoViewToggleButton.SetIcon(_iconName);
         }
 
