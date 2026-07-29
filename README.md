@@ -95,7 +95,7 @@ Simple player controller with built in stair/slope support.
 Saves and loads encrypted json files, stores them in a Dictionary<string, object> (name/id - data) at runtime. **This system is incredibly work in progress and has been changing a lot as of recent. If you are going to use this package, I heavily recommend downloading the package and sticking to it, modifying it yourself if need be.** Summaries are on the functions in the class, I will write documentation here once the system is in a more finished state.
 
 # State Machine
-A [Finite State Machine](#https://en.wikipedia.org/wiki/Finite-state_machine) system for Unity projects.
+A <a href="https://en.wikipedia.org/wiki/Finite-state_machine">Finite State Machine</a> system for Unity projects.
 
 ## StateMachine
 The MonoBehaviour to derive from for state machine behaviour.
@@ -111,6 +111,7 @@ void Start()
     state2.AddTransition(state1, condition2); // Will transition from state 2 -> state 1 if condition 2 evaluates to true.
 }
 ```
+
 *Documentation is W.I.P.*
 
 # Utility Scripts
