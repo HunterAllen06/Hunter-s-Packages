@@ -14,7 +14,6 @@ Feel free to use these in your own projects or base your own code off of mine, n
 - [Save System](#save-system)
 - [State Machine](#state-machine)
 - [Utility Scripts](#utility-scripts)
-- 
 
 *Documentation is W.I.P., some sections are unfinished.*
 
