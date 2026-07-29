@@ -71,7 +71,7 @@ void Examples()
 A few components to help with interface menus.
 
 ## Menu.cs
-Goes onto a GameObject that is the 'menu'. Requires a CanvasGroup component on the same GameObject.
+A component that goes onto a GameObject that is the 'menu'. Requires a CanvasGroup component on the same GameObject.
 - EnterMenu() - Calls the OnEnterMenu event, animates the menu if a MenuAnimator component is on the same GameObject.
 - ExitMenu() - Calls the OnExitMenu event, animates the menu if a MenuAnimator component is on the same GameObject.
 ## MenuAnimator.cs
