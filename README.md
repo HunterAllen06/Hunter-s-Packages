@@ -5,6 +5,16 @@ Again, please note that these tools are built for my own projects; **<ins>this m
 
 Feel free to use these in your own projects or base your own code off of mine, no credit needed; just don't claim it as your own.
 
+# Index
+[Events](#events)
+[Game Services](#game-events)
+[Log Tools](#log-tools)
+[Menus](#menus)
+[Player Controller](#player-controller)
+[Save System](#save-system)
+[State Machine](#state-machine)
+[Utility Scripts](#utility-scripts)
+
 # Events
 A small system that allows you to bind events to functions by type or object.
 ```cs
@@ -83,7 +93,23 @@ Simple player controller with built in stair/slope support.
 Saves and loads encrypted json files, stores them in a Dictionary<string, object> (name/id - data) at runtime. **This system is incredibly work in progress and has been changing a lot as of recent. If you are going to use this package, I heavily recommend downloading the package and sticking to it, modifying it yourself if need be.** Summaries are on the functions in the class, I will write documentation here once the system is in a more finished state.
 
 # State Machine
-A <a href="https://en.wikipedia.org/wiki/Finite-state_machine">Finite State Machine</a> system for Unity projects. *W.I.P!*
+A [Finite State Machine](#https://en.wikipedia.org/wiki/Finite-state_machine) system for Unity projects.
+
+## StateMachine
+The MonoBehaviour to derive from for state machine behaviour.
+```cs
+void Start()
+{
+    var state1 = new State1();
+    var state2 = new State2();
+    var condition1 = new Condition1();
+    var condition2 = new Condition2();
+
+    state1.AddTransition(state2, condition1); // Will transition from state 1 -> state 2 if condition 1 evaluates to true.
+    state2.AddTransition(state1, condition2); // Will transition from state 2 -> state 1 if condition 2 evaluates to true.
+}
+```
+*Documentation is W.I.P.*
 
 # Utility Scripts
 Lots of miscellaneous components and extension scripts for various classes/types. Here are some of the main features:
@@ -121,3 +147,5 @@ Lots of miscellaneous components and extension scripts for various classes/types
 
 ## Physics
 - Spring
+
+Some of these utility scripts are based off of [git-ammend's Unity Utils](https://github.com/adammyhre/Unity-Utils)
