@@ -14,6 +14,9 @@ Feel free to use these in your own projects or base your own code off of mine, n
 - [Save System](#save-system)
 - [State Machine](#state-machine)
 - [Utility Scripts](#utility-scripts)
+- 
+
+*Documentation is W.I.P., some sections are unfinished.*
 
 # Events
 A small system that allows you to bind events to functions by type or object.
@@ -111,8 +114,6 @@ void Start()
     state2.AddTransition(state1, condition2); // Will transition from state 2 -> state 1 if condition 2 evaluates to true.
 }
 ```
-
-*Documentation is W.I.P.*
 
 # Utility Scripts
 Lots of miscellaneous components and extension scripts for various classes/types. Here are some of the main features:
