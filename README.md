@@ -1,7 +1,7 @@
 # DISCLAIMER
 This repo primarily exists for personal use, and so projects I'm working on that have multiple programmers can share these utility/helper classes.
 
-Again, please note that these tools are built for my own projects; this means that they could change in functionality at any time. If you plan on using them long term, I strongly suggest sticking to one version or paying close attention to each update/commit.
+Again, please note that these tools are built for my own projects; **<ins>this means that they could change in functionality at any time</ins>**. If you plan on using them long term, I strongly suggest sticking to one version/installing a packing and sticking to it, or paying very close attention to each update/commit.
 
 Feel free to use these in your own projects or base your own code off of mine, no credit needed; just don't claim it as your own.
 
@@ -56,16 +56,68 @@ void Examples()
 ```
 
 # Menus
-W.I.P!
+A few components to help with interface menus.
 
-# Player Controller
-W.I.P!
+## Menu.cs
+    Goes onto a GameObject that is the 'menu'. Requires a CanvasGroup component on the same GameObject.
+    - EnterMenu() - Calls the OnEnterMenu event, animates the menu if a MenuAnimator component is on the same GameObject.
+    - ExitMenu() - Calls the OnExitMenu event, animates the menu if a MenuAnimator component is on the same GameObject.
+## MenuAnimator.cs
+    Automatically animates the menu's transform and canvas transform when the menu is entered or exited.
+## MenuGroup.cs
+    Can be put on a GameObject that is the parent of one or more GameObjects with the Menu component to help automatically exit previous menus when a new one is entered.
 
-# Save System
-W.I.P!
+# Player Controller (HEAVY W.I.P.)
+Simple player controller with built in stair/slope support.
+
+## PlayerController.cs
+    Has functions for providing input to the PlayerMover and PlayerCamera, but doesn't apply input on its own. You will need to create a class to provide input to PlayerController.
+
+## PlayerMover.cs
+    Can move the player and handle ground/stair/slope detection. Automatically sets Collider height in OnValidate() according to height/raycast settings. Input is provided by the Player Controller.
+
+## PlayerCamera.cs
+    Rotates the player camera and player body in Update and FixedUpdate. Input is provided by the Player Controller.
+
+# Save System (HEAVY W.I.P.)
+Saves and loads encrypted json files, stores them in a Dictionary<string, object> (name/id - data) at runtime. **This system is incredibly work in progress and has been changing a lot as of recent. If you are going to use this package, I heavily recommend downloading the package and sticking to it, modifying it yourself if need be.** Summaries are on the functions in the class, I will write documentation here once the system is in a more finished state.
 
 # State Machine
-W.I.P!
+A <a href="https://en.wikipedia.org/wiki/Finite-state_machine">Finite State Machine</a> system for Unity projects. *W.I.P!*
 
 # Utility Scripts
-W.I.P!
+Lots of miscellaneous components and extension scripts for various classes/types. Here are some of the main features:
+
+## Editor
+- Albedo View Toggle
+- Orient to Surface Component
+
+## Components
+- Raycaster
+- TransformSpring (very buggy - breaks at low framerates in regular Update(), stutters at high framerates in FixedUpdate)
+
+## Data Classes
+- EAxis - Simple flags enum with [X, Y, Z] values
+- ListWrapper - Literally just a List. I made this to be able to store Lists within Lists.
+
+## Extensions
+- AudioSourceExtensions
+- CanvasGroupExtensions
+- ComponentExtensions
+- EnumerableExtensions
+- GameObjectExtensions
+- MeshRendererExtensions
+- NavMeshExtensions
+- RigidbodyExtensions
+- SceneExtensions
+- VectorExtensions
+
+## Helper Classes
+- WaitFunctions
+- Timer
+- ObjecWithProbability
+- RandomFunctions
+- RandomObjectContainer
+
+## Physics
+- Spring
