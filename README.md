@@ -6,14 +6,14 @@ Again, please note that these tools are built for my own projects; **<ins>this m
 Feel free to use these in your own projects or base your own code off of mine, no credit needed; just don't claim it as your own.
 
 # Index
-[Events](#events)
-[Game Services](#game-events)
-[Log Tools](#log-tools)
-[Menus](#menus)
-[Player Controller](#player-controller)
-[Save System](#save-system)
-[State Machine](#state-machine)
-[Utility Scripts](#utility-scripts)
+- [Events](#events)
+- [Game Services](#game-services)
+- [Log Tools](#log-tools)
+- [Menus](#menus)
+- [Player Controller](#player-controller)
+- [Save System](#save-system)
+- [State Machine](#state-machine)
+- [Utility Scripts](#utility-scripts)
 
 # Events
 A small system that allows you to bind events to functions by type or object.
@@ -77,7 +77,8 @@ A few components to help with interface menus.
 ## MenuGroup.cs
     Can be put on a GameObject that is the parent of one or more GameObjects with the Menu component to help automatically exit previous menus when a new one is entered.
 
-# Player Controller (HEAVY W.I.P.)
+# Player Controller
+**System is a heavy W.I.P!**
 Simple player controller with built in stair/slope support.
 
 ## PlayerController.cs
@@ -89,7 +90,8 @@ Simple player controller with built in stair/slope support.
 ## PlayerCamera.cs
     Rotates the player camera and player body in Update and FixedUpdate. Input is provided by the Player Controller.
 
-# Save System (HEAVY W.I.P.)
+# Save System
+**System is a heavy W.I.P!**
 Saves and loads encrypted json files, stores them in a Dictionary<string, object> (name/id - data) at runtime. **This system is incredibly work in progress and has been changing a lot as of recent. If you are going to use this package, I heavily recommend downloading the package and sticking to it, modifying it yourself if need be.** Summaries are on the functions in the class, I will write documentation here once the system is in a more finished state.
 
 # State Machine
