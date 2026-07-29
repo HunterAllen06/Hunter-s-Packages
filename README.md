@@ -71,26 +71,26 @@ void Examples()
 A few components to help with interface menus.
 
 ## Menu.cs
-    Goes onto a GameObject that is the 'menu'. Requires a CanvasGroup component on the same GameObject.
-    - EnterMenu() - Calls the OnEnterMenu event, animates the menu if a MenuAnimator component is on the same GameObject.
-    - ExitMenu() - Calls the OnExitMenu event, animates the menu if a MenuAnimator component is on the same GameObject.
+Goes onto a GameObject that is the 'menu'. Requires a CanvasGroup component on the same GameObject.
+- EnterMenu() - Calls the OnEnterMenu event, animates the menu if a MenuAnimator component is on the same GameObject.
+- ExitMenu() - Calls the OnExitMenu event, animates the menu if a MenuAnimator component is on the same GameObject.
 ## MenuAnimator.cs
-    Automatically animates the menu's transform and canvas transform when the menu is entered or exited.
+Automatically animates the menu's transform and canvas transform when the menu is entered or exited.
 ## MenuGroup.cs
-    Can be put on a GameObject that is the parent of one or more GameObjects with the Menu component to help automatically exit previous menus when a new one is entered.
+Can be put on a GameObject that is the parent of one or more GameObjects with the Menu component to help automatically exit previous menus when a new one is entered.
 
 # Player Controller
 **System is a heavy W.I.P!**
 Simple player controller with built in stair/slope support.
 
 ## PlayerController.cs
-    Has functions for providing input to the PlayerMover and PlayerCamera, but doesn't apply input on its own. You will need to create a class to provide input to PlayerController.
+Has functions for providing input to the PlayerMover and PlayerCamera, but doesn't apply input on its own. You will need to create a class to provide input to PlayerController.
 
 ## PlayerMover.cs
-    Can move the player and handle ground/stair/slope detection. Automatically sets Collider height in OnValidate() according to height/raycast settings. Input is provided by the Player Controller.
+Can move the player and handle ground/stair/slope detection. Automatically sets Collider height in OnValidate() according to height/raycast settings. Input is provided by the Player Controller.
 
 ## PlayerCamera.cs
-    Rotates the player camera and player body in Update and FixedUpdate. Input is provided by the Player Controller.
+Rotates the player camera and player body in Update and FixedUpdate. Input is provided by the Player Controller.
 
 # Save System
 **System is a heavy W.I.P!**
