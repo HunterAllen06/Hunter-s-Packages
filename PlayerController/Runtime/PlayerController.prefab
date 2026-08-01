@@ -105,7 +105,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _cameraTransform: {fileID: 4686990253405015167}
-  _playerCollider: {fileID: 5423744661857521568}
+  _playerBody: {fileID: 5423744661857521568}
   _sensitivity: 0.5
   _smoothTime: 0.02
   _headRoom: 0.1

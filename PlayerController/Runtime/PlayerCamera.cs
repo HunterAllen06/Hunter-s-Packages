@@ -9,7 +9,7 @@ namespace HunterAllen.Player
         Transform _cameraTransform;
 
         [SerializeField]
-        CapsuleCollider _playerCollider;
+        CapsuleCollider _playerBody;
 
         [Header("Parameters")]
         [SerializeField]
@@ -42,12 +42,12 @@ namespace HunterAllen.Player
         {
             _rotXLerped = Mathf.SmoothDamp(_rotXLerped, RotX, ref _rotXVelocity, _smoothTime);
             _rotYLerped = Mathf.SmoothDamp(_rotYLerped, RotY, ref _rotYVelocity, _smoothTime);
-            _cameraTransform.localRotation = Quaternion.Euler(_rotXLerped * Vector3.right);
-            _cameraTransform.localPosition = (_playerCollider.height * 0.5f - _headRoom) * Vector3.up;
+            _cameraTransform.rotation = Quaternion.Euler(_rotXLerped * Vector3.right + _rotYLerped * Vector3.up);
+            _cameraTransform.localPosition = (_playerBody.height * 0.5f - _headRoom) * Vector3.up;
         }
         void FixedUpdate()
         {   
-            _playerCollider.transform.localRotation = Quaternion.Euler(_rotYLerped * Vector3.up);
+            _playerBody.transform.localRotation = Quaternion.Euler(_rotYLerped * Vector3.up);
         }
         
         public void ApplyLookInput(Vector2 input)
